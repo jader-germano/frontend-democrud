@@ -41,7 +41,7 @@ export const AnimationContainer = styled.div`
         top: 3%;
         scroll-behavior: smooth;
         margin: 2px 2px 2px 2px;
-        width: 340px;
+        width: 540px;
         text-align: center;
 
         h1 {
@@ -97,4 +97,56 @@ export const AnimationContainer = styled.div`
 
 `;
 
+export const TableContainer = styled.section`
+  margin-top: 5px;
+  overflow: scroll;
+  max-height: 250px;
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 1px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background-color: grey;
+    -webkit-box-shadow: 0 0 1px grey;
+}
+
+  table {
+  width: 100%;
+  max-width:100%;
+	background: #312e38;
+	color: grey;
+	border: none;
+	border-radius: 10px;
+	border-color: grey;
+    th {
+      background: #312e38;
+      max-width:100%;
+      color: grey;
+      font-weight: normal;
+      padding: 20px 32px;
+      text-align: left;
+      font-size: 16px;
+      line-height: 24px;
+      border-radius: 10px;
+    }
+    td {
+      max-width:100%;
+      padding: 20px 32px;
+      border: 0;
+      background: #312e38;
+      font-size: 16px;
+      font-weight: normal;
+      color: #969cb3;
+      text-align: left;
+    }
+    td:first-child {
+      border-radius: 8px 0 0 8px;
+    }
+    td:last-child {
+      border-radius: 0 8px 8px 0;
+    }
+  }
+`;
 

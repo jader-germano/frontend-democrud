@@ -7,13 +7,13 @@ import { InputContainer, Error } from './input.styles';
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     name: string;
     icon: React.ComponentType<IconBaseProps>;
+    pattern?: string;
 }
 
-const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
+const Input: React.FC<InputProps> = ({ name, icon: Icon, pattern, ...rest }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [isFilled, setIsFilled] = useState(false);
-
     const { fieldName, defaultValue, error, registerField } = useField(name);
 
     const handleInputBlur = useCallback(() => {
@@ -40,6 +40,7 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
                 onBlur={handleInputBlur}
                 defaultValue={defaultValue}
                 ref={inputRef}
+                pattern={pattern}
                 {...rest}
             />
             {error && (

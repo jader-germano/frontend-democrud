@@ -1,6 +1,3 @@
-import { grey } from '@material-ui/core/colors';
-import { makeStyles } from '@material-ui/core/styles';
-import { ColDef, DataGrid } from '@material-ui/data-grid';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import React, { useCallback, useRef, useState } from 'react';
@@ -11,7 +8,7 @@ import Input from '../../components/Input/input.index';
 import { useToast } from '../../hooks/toast';
 import { apiPostOffice } from '../../services/api';
 import getValidationErrors from '../../utils/getValidationErrors';
-import { AnimationContainer, Container, Content } from './styles';
+import { AnimationContainer, Container, Content, TableContainer } from './styles';
 
 interface UserFormData {
 	name: string;
@@ -39,48 +36,48 @@ interface ContactFormData {
 	type: string;
 }
 
-const columns: ColDef[] = [
-	{ field: 'description', headerName: 'Descrição', width: 130 },
-	{ field: 'type', headerName: 'Tipo', width: 90 },
-];
-
-const rows = [
-	{ id: 1, description: 'A', type: 'Jon' },
-	{ id: 2, description: 'B', type: 'Jon' },
-	{ id: 3, description: 'C', type: 'Jon' },
-	{ id: 4, description: 'D', type: 'Jon' },
-	{ id: 5, description: 'E', type: 'Jon' },
-	{ id: 6, description: 'F', type: 'Jon' },
-	
-];
-
-
-const useStyles = makeStyles({
-
-	table: {
-		minHeight: 220,
-		background: '#312e38',
-		fontFamily: "'Roboto Slab', serif",
-		color: 'grey',
-		border: 'none',
-		borderRadius: '10px',
-		borderColor: 'grey',
-		colorPrimary: 'ff9900'
-	},
-
-});
 
 const UserDetail: React.FC = () => {
 	const formRef = useRef<FormHandles>(null);
-	const [zipCode, setZipCode] = useState('');
 	const { addToast } = useToast();
-	const classes = useStyles();
+	const [contactFormArray, setContactFormArray] = useState<ContactFormData[]>([]);
 
 	const onChangeHandler = ((e: React.KeyboardEvent<HTMLInputElement>): void => {
-		const cep = e.currentTarget.value.replace('-', '');
-		console.log(cep, cep.length);
-		setZipCode(cep);
+		const cep = e.currentTarget.value.replace(/\s|[:alpha:]/g, '');
 		if (Number(cep.length) > 7) { searchCep(Number(cep)); }
+	});
+
+
+	const onCpfChangeHandler = ((e: React.FocusEvent<HTMLInputElement>): void => {
+		const cpf = e.currentTarget.value.replace(/\s|[:alpha:]/g, '');
+		formRef.current?.setFieldValue('cpf', cpf);
+
+		const cpfFormatado = e.currentTarget.value.replace(/(\d{3})?(\d{3})?(\d{3})?(\d{2})/, "$1.$2.$3-$4");
+		formRef.current?.setFieldValue('cpf', cpfFormatado);
+	});
+
+	const onEmailChangeHandler = ((e: React.FocusEvent<HTMLInputElement>): void => {
+		const email = e.currentTarget.value.replace(/\s/g, '');
+		formRef.current?.setFieldValue('email', email);
+
+		const index = contactFormArray.findIndex(c => c.description === email);
+		if (email.match(/^\S+@\S+\.\S+$/)) {
+			if (index === -1 && email.length) { setContactFormArray([...contactFormArray, { id: contactFormArray.length, description: email, type: 'EMAIL' }]); }
+		}
+
+	});
+
+	const onPhoneChangeHandler = ((e: React.FocusEvent<HTMLInputElement>): void => {
+		const phone = e.currentTarget.value.replace(/\s|[:alpha:]/g, '');
+		formRef.current?.setFieldValue('phone', phone);
+
+		const phoneFormatado = phone.replace(/(\d{2})?(\d{5})?(\d{4})/, "($1) $2-$3");
+		formRef.current?.setFieldValue('phone', phoneFormatado);
+
+		const index = contactFormArray.findIndex(c => c.description === phoneFormatado);
+		if (index === -1 && phone.length) { setContactFormArray([...contactFormArray, { id: contactFormArray.length, description: phoneFormatado, type: 'PHONE' }]); }
+
+
 	});
 
 	const searchCep = async function (zipCode: number) {
@@ -115,7 +112,6 @@ const UserDetail: React.FC = () => {
 					bairro: Yup.string().required('Bairro é obrigatório'),
 					uf: Yup.string().required('UF é obrigatório'),
 					localidade: Yup.string().required('Cidade é obrigatório'),
-
 					type: Yup.string().required('Tipo é obrigatório'),
 					description: Yup.string().min(6, 'Senha obrigatória. Mínimo de 6 dígitos'),
 				});
@@ -145,18 +141,36 @@ const UserDetail: React.FC = () => {
 						<h1>Detalhes Usuário</h1>
 						<Input name="name" icon={FiUser} placeholder="Nome Completo" />
 						<Input name="username" icon={FiLogIn} placeholder="Login" />
-						<Input name="cpf" icon={FiUserPlus} placeholder="CPF" />
+						<Input name="cpf" onBlur={onCpfChangeHandler} maxLength={11}
+							icon={FiUserPlus} placeholder="CPF" />
 						<Input name="password" icon={FiLock} type="password" placeholder="Senha" />
-						<Input name="passwordCheck" icon={FiLock} type="password" placeholder="Confimr a senha" />
 
 						<h4>Contatos</h4>
-						<Input name="email" icon={FiMail} placeholder="E-mail" />
-						<Input name="phone" icon={FiPhone} placeholder="Telefone" />
-						<div style={{ margin: '50', position: 'relative' }}>
-							<DataGrid className={classes.table} aria-label="customized table" rows={rows} columns={columns} pageSize={2} checkboxSelection />
-						</div>
+						<Input name="email" onBlur={onEmailChangeHandler} title="Adicione um ou mais e-mails"
+							icon={FiMail} placeholder="E-mail" />
+						<Input name="phone" onBlur={onPhoneChangeHandler} title="Adicione um ou mais telefones"
+							type="string" maxLength={11} icon={FiPhone} placeholder="Telefone" />
+						<TableContainer>
+							<table id="style-1">
+								<thead>
+									<tr>
+										<th>Descrição</th>
+										<th>Tipo</th>
+									</tr>
+								</thead>
 
-						<h4 style={{ paddingTop: '215px' }}>Endereço</h4>
+								{contactFormArray.map((contact) => (
+									<tbody key={contact.id}>
+										<tr>
+											<td className="title">{contact.description}</td>
+											<td>{contact.type}</td>
+										</tr>
+									</tbody>
+								))}
+							</table>
+						</TableContainer>
+
+						<h4>Endereço</h4>
 						<Input onKeyUpCapture={onChangeHandler}
 							name="cep" icon={FiMap} placeholder="Cep" />
 						<Input name="logradouro" icon={FiHome} placeholder="Endereço" />
