@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 import Button from '../../components/Button/button.index';
 import Input from '../../components/Input/input.index';
 import { useToast } from '../../hooks/toast';
-import { apiPostOffice } from '../../services/api';
+import apiPostOffice from '../../services/apiPostOffice';
 import getValidationErrors from '../../utils/getValidationErrors';
 import { AnimationContainer, Container, Content, TableContainer } from './styles';
 

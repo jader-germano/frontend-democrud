@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
-import {api} from '../services/api';
+import api from '../services/api';
 
 interface AuthState {
     token: string;
@@ -32,6 +32,7 @@ const AuthProvider: React.FC = ({ children }) => {
             username,
             password,
         });
+
         const { token, user } = response.data;
 
         localStorage.setItem('@DemoCrud:token', token);
